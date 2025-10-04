@@ -1,7 +1,9 @@
-use bevy::diagnostic::DiagnosticsStore;
-use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
-use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, platform::collections::HashMap};
+use bevy::{
+    diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
+    platform::collections::HashMap,
+    prelude::*,
+    render::camera::ScalingMode,
+};
 use bevy_asset_loader::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
 
