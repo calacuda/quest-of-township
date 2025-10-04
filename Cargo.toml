@@ -4,4 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = "0.17.1"
+bevy = "0.16"
+bevy_asset_loader = { version = "0.23.0", features = ["2d", "progress_tracking"] }
+bevy_common_assets = { version = "0.14.0", features = ["ron"] }
+bevy_ecs_tiled = "0.9.5"
+iyes_progress = { version = "0.14.0", features = ["assets"] }
