@@ -101,7 +101,7 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
             over_world
                 .floor
                 .get("tile1438")
-                .expect("Can access audio asset with file name")
+                .expect("Can access tile asset with file name")
                 .to_owned(),
         ),
         tile_transform(0., 0.),
@@ -113,7 +113,7 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
             over_world
                 .floor
                 .get("tile000")
-                .expect("Can access audio asset with file name")
+                .expect("Can access tile asset with file name")
                 .to_owned(),
         ),
         tile_transform(W_MAX as f32, H_MAX as f32),
@@ -125,7 +125,7 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
             over_world
                 .floor
                 .get("tile000")
-                .expect("Can access audio asset with file name")
+                .expect("Can access tile asset with file name")
                 .to_owned(),
         ),
         tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
@@ -137,7 +137,7 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
             over_world
                 .sprites
                 .get("tile000")
-                .expect("Can access audio asset with file name")
+                .expect("Can access tile asset with file name")
                 .to_owned(),
         ),
         tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
