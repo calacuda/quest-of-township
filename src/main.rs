@@ -12,6 +12,8 @@ const W_IN_TILES: usize = 35;
 const H_MAX: usize = H_IN_TILES - 1;
 const W_MAX: usize = W_IN_TILES - 2;
 const TILE_PIXLES: usize = 16;
+const TILE_PIXLE_W: usize = 16;
+const TILE_PIXLE_H: usize = 16;
 
 #[derive(AssetCollection, Resource)]
 struct OverWorldTiles {
@@ -93,6 +95,7 @@ fn tile_transform(x: f32, y: f32) -> Transform {
 
 fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
     // draw the original image (whole sprite sheet)
+    // top left tile
     commands.spawn((
         Sprite::from_image(
             over_world
@@ -103,6 +106,8 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
         ),
         tile_transform(0., 0.),
     ));
+
+    // bottom right tile
     commands.spawn((
         Sprite::from_image(
             over_world
@@ -114,6 +119,7 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
         tile_transform(W_MAX as f32, H_MAX as f32),
     ));
 
+    // middle tiles
     commands.spawn((
         Sprite::from_image(
             over_world
@@ -125,7 +131,7 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
         tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
     ));
 
-    // draw sprite
+    // draw character sprite
     commands.spawn((
         Sprite::from_image(
             over_world
