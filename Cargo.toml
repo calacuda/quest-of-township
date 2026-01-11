@@ -10,11 +10,11 @@ bevy_common_assets = { version = "0.14.0", features = ["ron"] }
 bevy_ecs_tiled = "0.10.0"
 iyes_progress = { version = "0.15.0", features = ["assets"] }
 
-# You can configure the warning levels of Bevy lints here. For a list of all lints, see:
-# <https://thebevyflock.github.io/bevy_cli/bevy_lint/lints/>
-[package.metadata.bevy_lint]
-# panicking_methods = "deny"
-# pedantic = "warn"
+# # You can configure the warning levels of Bevy lints here. For a list of all lints, see:
+# # <https://thebevyflock.github.io/bevy_cli/bevy_lint/lints/>
+# [package.metadata.bevy_lint]
+# # panicking_methods = "deny"
+# # pedantic = "warn"
 
 [profile.dev]
 opt-level = 1

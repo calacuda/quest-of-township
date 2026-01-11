@@ -82,7 +82,7 @@ fn setup(mut commands: Commands) {
     ));
 }
 
-fn tile_transform(x: f32, y: f32) -> Transform {
+pub fn tile_transform(x: f32, y: f32) -> Transform {
     let x_zero = (W_MAX * TILE_PIXLES) as f32 * -0.5;
     let y_zero = (H_MAX * TILE_PIXLES) as f32 * 0.5;
 

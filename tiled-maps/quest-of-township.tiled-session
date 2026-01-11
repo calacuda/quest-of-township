@@ -1,0 +1,43 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "starter-town.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "main-outside.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 1
+        },
+        "starter-town.tmx": {
+            "scale": 0.5,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 53,
+                "y": 238
+            }
+        }
+    },
+    "last.imagePath": "/home/yogurt/Code/rust/quest-of-township/assets/tile-sets/single-png",
+    "map.fixedSize": false,
+    "map.height": 19,
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 35,
+    "openFiles": [
+        "starter-town.tmx",
+        "main-outside.tsx"
+    ],
+    "project": "quest-of-township.tiled-project",
+    "recentFiles": [
+        "main-outside.tsx",
+        "starter-town.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.type": 1
+}
