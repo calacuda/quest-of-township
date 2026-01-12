@@ -1,6 +1,7 @@
 use bevy::{
     camera::ScalingMode,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
+    input::keyboard::Key,
     log::{Level, LogPlugin},
     platform::collections::HashMap,
     prelude::*,
@@ -38,6 +39,12 @@ struct OverWorldTiles {
     )]
     sprites: Handle<Image>,
 }
+
+#[derive(Clone, Default, Copy, Component)]
+pub struct BackgroundMarker;
+
+#[derive(Clone, Default, Copy, Component)]
+pub struct PlayerLoc(f32, f32);
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 enum AssetLoading {
@@ -84,6 +91,7 @@ fn main() {
                 .run_if(in_state(AssetLoading::Loading))
                 .after(LoadingStateSet(AssetLoading::Loading)),
         )
+        .add_systems(Update, (move_pc).run_if(in_state(AssetLoading::Loaded)))
         .add_systems(
             OnEnter(AssetLoading::Loaded),
             spawn_pc.after(LoadingStateSet(AssetLoading::Loading)),
@@ -113,6 +121,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         TiledMap(map_handle),
         TilemapAnchor::TopLeft,
         tile_transform(33., 33.),
+        PlayerLoc(33., 33.),
+        BackgroundMarker,
     ));
 }
 
@@ -139,8 +149,8 @@ pub fn character_tile_transform(x: f32, y: f32) -> Transform {
 }
 
 fn spawn_pc(mut commands: Commands, over_world: Res<OverWorldTiles>) {
-    debug!("spawning player character");
     // draw character sprite
+    debug!("spawning player character");
 
     for index in [1, 65, 338, 220, 362, 424, 347, 193] {
         let texture_handle = over_world.sprites.clone();
@@ -176,4 +186,31 @@ fn print_progress(
             progress
         );
     }
+}
+
+fn move_pc(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut background: Single<(&mut PlayerLoc, &mut Transform), With<BackgroundMarker>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::KeyW) {
+        trace!("move up");
+        background.0.1 -= 1.;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::KeyS) {
+        trace!("move down");
+        background.0.1 += 1.;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::KeyA) {
+        trace!("move left");
+        background.0.0 -= 1.;
+    }
+
+    if keyboard_input.just_pressed(KeyCode::KeyD) {
+        trace!("move right");
+        background.0.0 += 1.;
+    }
+
+    *background.1 = tile_transform(background.0.0, background.0.1);
 }
