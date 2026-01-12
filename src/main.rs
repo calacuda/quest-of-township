@@ -1,6 +1,7 @@
 use bevy::{
     camera::ScalingMode,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
+    log::{Level, LogPlugin},
     platform::collections::HashMap,
     prelude::*,
 };
@@ -8,63 +9,84 @@ use bevy_asset_loader::prelude::*;
 use bevy_ecs_tiled::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
 
-const H_IN_TILES: usize = 19;
-const W_IN_TILES: usize = 35;
-const H_MAX: usize = H_IN_TILES - 1;
-const W_MAX: usize = W_IN_TILES - 2;
-const TILE_PIXLES: usize = 16;
-const TILE_PIXLE_W: usize = 16;
-const TILE_PIXLE_H: usize = 16;
+pub const H_IN_TILES: usize = 19;
+pub const W_IN_TILES: usize = 35;
+pub const H_MAX: usize = H_IN_TILES - 1;
+pub const W_MAX: usize = W_IN_TILES - 2;
+pub const TILE_PIXLES: usize = 16;
+pub const TILE_PIXLE_W: usize = 16;
+pub const TILE_PIXLE_H: usize = 16;
 
 #[derive(AssetCollection, Resource)]
 struct OverWorldTiles {
     // #[asset(path = "../assets/tile-sets/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
     // floor: HashMap<AssetFileStem, Handle<Image>>,
-    #[asset(path = "../assets/sprites/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
-    sprites: HashMap<AssetFileStem, Handle<Image>>,
+    // #[asset(path = "../assets/sprites/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
+    // sprites: HashMap<AssetFileStem, Handle<Image>>,
+    #[asset(texture_atlas_layout(
+        tile_size_x = 16,
+        tile_size_y = 16,
+        padding_x = 1,
+        padding_y = 1,
+        rows = 12,
+        columns = 54
+    ))]
+    sprite_sheet: Handle<TextureAtlasLayout>,
+    #[asset(
+        path = "sprites/Spritesheet/roguelikeChar_transparent.png",
+        image(sampler(filter = nearest))
+    )]
+    sprites: Handle<Image>,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
-enum MyStates {
+enum AssetLoading {
     #[default]
-    AssetLoading,
-    Next,
+    Loading,
+    Loaded,
 }
 
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.set(ImagePlugin::default_nearest()),
-            ProgressPlugin::<MyStates>::new()
-                .with_state_transition(MyStates::AssetLoading, MyStates::Next),
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(LogPlugin {
+                    // Set the default log level for everything
+                    level: Level::INFO,
+                    // Or use a filter string for fine-grained control
+                    filter: format!("info,{}=trace", env!("CARGO_PKG_NAME").replace("-", "_")),
+                    ..default()
+                }),
             FrameTimeDiagnosticsPlugin::default(),
             TiledPlugin::default(),
+            ProgressPlugin::<AssetLoading>::new()
+                .with_state_transition(AssetLoading::Loading, AssetLoading::Loaded),
         ))
-        .init_state::<MyStates>()
+        .init_state::<AssetLoading>()
         .add_loading_state(
-            LoadingState::new(MyStates::AssetLoading)
-                .continue_to_state(MyStates::Next)
+            LoadingState::new(AssetLoading::Loading)
+                .continue_to_state(AssetLoading::Loaded)
                 .load_collection::<OverWorldTiles>(),
         )
         .add_systems(Startup, setup)
-        // .add_systems(OnEnter(MyStates::AssetLoading), render_description)
         .add_systems(
-            OnEnter(MyStates::Next),
-            || -> Progress { true.into() }.track_progress::<MyStates>(),
+            OnEnter(AssetLoading::Loaded),
+            || -> Progress { true.into() }.track_progress::<AssetLoading>(),
         )
         .add_systems(
             Update,
             (
                 print_progress,
-                track_fake_long_task.track_progress::<MyStates>(),
+                track_fake_long_task.track_progress::<AssetLoading>(),
             )
                 .chain()
-                .run_if(in_state(MyStates::AssetLoading))
-                .after(LoadingStateSet(MyStates::AssetLoading)),
+                .run_if(in_state(AssetLoading::Loading))
+                .after(LoadingStateSet(AssetLoading::Loading)),
         )
         .add_systems(
-            OnEnter(MyStates::Next),
-            draw_atlas.after(LoadingStateSet(MyStates::AssetLoading)),
+            OnEnter(AssetLoading::Loaded),
+            spawn_pc.after(LoadingStateSet(AssetLoading::Loading)),
         )
         .run();
 }
@@ -89,14 +111,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn a new entity with the TiledMap component
     commands.spawn((
         TiledMap(map_handle),
-        // But you can add extra components to change the defaults settings and how
-        // your world is actually displayed
-        // TilemapAnchor::Center,
         TilemapAnchor::TopLeft,
-        // TilemapAnchor::Custom((-1., 1.).into()),
-        // tile_transform(0., 42.),
         tile_transform(33., 33.),
-        // tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
     ));
 }
 
@@ -122,125 +138,21 @@ pub fn character_tile_transform(x: f32, y: f32) -> Transform {
     )
 }
 
-fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
-    // // draw the original image (whole sprite sheet)
-    // // top left tile
-    // commands.spawn((
-    //     Sprite::from_image(
-    //         over_world
-    //             .floor
-    //             .get("tile1438")
-    //             .expect("Can access tile asset with file name")
-    //             .to_owned(),
-    //     ),
-    //     tile_transform(0., 0.),
-    // ));
-    //
-    // // bottom right tile
-    // commands.spawn((
-    //     Sprite::from_image(
-    //         over_world
-    //             .floor
-    //             .get("tile000")
-    //             .expect("Can access tile asset with file name")
-    //             .to_owned(),
-    //     ),
-    //     tile_transform(W_MAX as f32, H_MAX as f32),
-    // ));
-    //
-    // // middle tiles
-    // commands.spawn((
-    //     Sprite::from_image(
-    //         over_world
-    //             .floor
-    //             .get("tile000")
-    //             .expect("Can access tile asset with file name")
-    //             .to_owned(),
-    //     ),
-    //     tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    // ));
-
+fn spawn_pc(mut commands: Commands, over_world: Res<OverWorldTiles>) {
+    debug!("spawning player character");
     // draw character sprite
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile000")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile065")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile338")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile220")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile362")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile424")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile347")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .sprites
-                .get("tile193")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
+
+    for index in [1, 65, 338, 220, 362, 424, 347, 193] {
+        let texture_handle = over_world.sprites.clone();
+        let layout_handle = over_world.sprite_sheet.clone();
+        let mut atlas = TextureAtlas::from(layout_handle);
+        atlas.index = index;
+
+        commands.spawn((
+            Sprite::from_atlas_image(texture_handle, atlas),
+            character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+        ));
+    }
 }
 
 fn track_fake_long_task() -> Progress {
@@ -248,7 +160,7 @@ fn track_fake_long_task() -> Progress {
 }
 
 fn print_progress(
-    progress: Res<ProgressTracker<MyStates>>,
+    progress: Res<ProgressTracker<AssetLoading>>,
     diagnostics: Res<DiagnosticsStore>,
     mut last_done: Local<u32>,
 ) {
