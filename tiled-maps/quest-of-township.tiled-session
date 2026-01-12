@@ -38,7 +38,7 @@
         }
     },
     "last.exportedFilePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps",
-    "last.imagePath": "/home/yogurt/Code/rust/quest-of-township/assets/tile-sets/single-png",
+    "last.imagePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps/sprites/single-png",
     "map.fixedSize": false,
     "map.height": 19,
     "map.lastUsedExportFilter": "All Files (*)",

@@ -171,6 +171,76 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
         ),
         character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
     ));
+    commands.spawn((
+        Sprite::from_image(
+            over_world
+                .sprites
+                .get("tile065")
+                .expect("Can access tile asset with file name")
+                .to_owned(),
+        ),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
+    commands.spawn((
+        Sprite::from_image(
+            over_world
+                .sprites
+                .get("tile338")
+                .expect("Can access tile asset with file name")
+                .to_owned(),
+        ),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
+    commands.spawn((
+        Sprite::from_image(
+            over_world
+                .sprites
+                .get("tile220")
+                .expect("Can access tile asset with file name")
+                .to_owned(),
+        ),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
+    commands.spawn((
+        Sprite::from_image(
+            over_world
+                .sprites
+                .get("tile362")
+                .expect("Can access tile asset with file name")
+                .to_owned(),
+        ),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
+    commands.spawn((
+        Sprite::from_image(
+            over_world
+                .sprites
+                .get("tile424")
+                .expect("Can access tile asset with file name")
+                .to_owned(),
+        ),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
+    commands.spawn((
+        Sprite::from_image(
+            over_world
+                .sprites
+                .get("tile347")
+                .expect("Can access tile asset with file name")
+                .to_owned(),
+        ),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
+    commands.spawn((
+        Sprite::from_image(
+            over_world
+                .sprites
+                .get("tile193")
+                .expect("Can access tile asset with file name")
+                .to_owned(),
+        ),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
 }
 
 fn track_fake_long_task() -> Progress {
