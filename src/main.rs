@@ -5,6 +5,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_asset_loader::prelude::*;
+use bevy_ecs_tiled::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
 
 const H_IN_TILES: usize = 19;
@@ -17,8 +18,8 @@ const TILE_PIXLE_H: usize = 16;
 
 #[derive(AssetCollection, Resource)]
 struct OverWorldTiles {
-    #[asset(path = "../assets/tile-sets/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
-    floor: HashMap<AssetFileStem, Handle<Image>>,
+    // #[asset(path = "../assets/tile-sets/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
+    // floor: HashMap<AssetFileStem, Handle<Image>>,
     #[asset(path = "../assets/sprites/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
     sprites: HashMap<AssetFileStem, Handle<Image>>,
 }
@@ -37,6 +38,7 @@ fn main() {
             ProgressPlugin::<MyStates>::new()
                 .with_state_transition(MyStates::AssetLoading, MyStates::Next),
             FrameTimeDiagnosticsPlugin::default(),
+            TiledPlugin::default(),
         ))
         .init_state::<MyStates>()
         .add_loading_state(
@@ -67,7 +69,7 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     // let w = (W_IN_TILES * TILE_PIXLES) as u32;
     let h = (H_IN_TILES * TILE_PIXLES) as u32;
 
@@ -80,9 +82,36 @@ fn setup(mut commands: Commands) {
             ..OrthographicProjection::default_2d()
         }),
     ));
+
+    // Load a map asset and retrieve its handle
+    let map_handle: Handle<TiledMapAsset> = asset_server.load("maps/starter-town.tmx");
+
+    // Spawn a new entity with the TiledMap component
+    commands.spawn((
+        TiledMap(map_handle),
+        // But you can add extra components to change the defaults settings and how
+        // your world is actually displayed
+        // TilemapAnchor::Center,
+        TilemapAnchor::TopLeft,
+        // TilemapAnchor::Custom((-1., 1.).into()),
+        // tile_transform(0., 42.),
+        tile_transform(33., 33.),
+        // tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    ));
 }
 
 pub fn tile_transform(x: f32, y: f32) -> Transform {
+    let x_zero = (W_MAX * TILE_PIXLES) as f32 * -0.5 - TILE_PIXLES as f32 * 0.5;
+    let y_zero = (H_MAX * TILE_PIXLES) as f32 * 0.5 + TILE_PIXLES as f32 * 0.5;
+
+    Transform::from_xyz(
+        x_zero + (-x + (W_MAX / 2) as f32) * TILE_PIXLES as f32,
+        y_zero + (y - (H_IN_TILES / 2) as f32) * TILE_PIXLES as f32,
+        0.,
+    )
+}
+
+pub fn character_tile_transform(x: f32, y: f32) -> Transform {
     let x_zero = (W_MAX * TILE_PIXLES) as f32 * -0.5;
     let y_zero = (H_MAX * TILE_PIXLES) as f32 * 0.5;
 
@@ -94,42 +123,42 @@ pub fn tile_transform(x: f32, y: f32) -> Transform {
 }
 
 fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
-    // draw the original image (whole sprite sheet)
-    // top left tile
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .floor
-                .get("tile1438")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        tile_transform(0., 0.),
-    ));
-
-    // bottom right tile
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .floor
-                .get("tile000")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        tile_transform(W_MAX as f32, H_MAX as f32),
-    ));
-
-    // middle tiles
-    commands.spawn((
-        Sprite::from_image(
-            over_world
-                .floor
-                .get("tile000")
-                .expect("Can access tile asset with file name")
-                .to_owned(),
-        ),
-        tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    ));
+    // // draw the original image (whole sprite sheet)
+    // // top left tile
+    // commands.spawn((
+    //     Sprite::from_image(
+    //         over_world
+    //             .floor
+    //             .get("tile1438")
+    //             .expect("Can access tile asset with file name")
+    //             .to_owned(),
+    //     ),
+    //     tile_transform(0., 0.),
+    // ));
+    //
+    // // bottom right tile
+    // commands.spawn((
+    //     Sprite::from_image(
+    //         over_world
+    //             .floor
+    //             .get("tile000")
+    //             .expect("Can access tile asset with file name")
+    //             .to_owned(),
+    //     ),
+    //     tile_transform(W_MAX as f32, H_MAX as f32),
+    // ));
+    //
+    // // middle tiles
+    // commands.spawn((
+    //     Sprite::from_image(
+    //         over_world
+    //             .floor
+    //             .get("tile000")
+    //             .expect("Can access tile asset with file name")
+    //             .to_owned(),
+    //     ),
+    //     tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    // ));
 
     // draw character sprite
     commands.spawn((
@@ -140,7 +169,7 @@ fn draw_atlas(mut commands: Commands, over_world: Res<OverWorldTiles>) {
                 .expect("Can access tile asset with file name")
                 .to_owned(),
         ),
-        tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+        character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
     ));
 }
 
