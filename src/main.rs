@@ -1,14 +1,25 @@
 use bevy::{
     camera::ScalingMode,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
-    input::keyboard::Key,
     log::{Level, LogPlugin},
-    platform::collections::HashMap,
     prelude::*,
 };
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_tiled::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
+
+use crate::{
+    components::{
+        background_marker::BackgroundMarker, player_loc::PlayerLoc, player_state::PlayerState,
+    },
+    events::player_movement::PlayerMovement,
+    systems::{controls_player_move, handle_player_move, move_pc},
+};
+
+pub mod components;
+pub mod events;
+pub mod plugins;
+pub mod systems;
 
 pub const H_IN_TILES: usize = 19;
 pub const W_IN_TILES: usize = 35;
@@ -40,12 +51,6 @@ struct OverWorldTiles {
     sprites: Handle<Image>,
 }
 
-#[derive(Clone, Default, Copy, Component)]
-pub struct BackgroundMarker;
-
-#[derive(Clone, Default, Copy, Component)]
-pub struct PlayerLoc(f32, f32);
-
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
 enum AssetLoading {
     #[default]
@@ -76,6 +81,7 @@ fn main() {
                 .continue_to_state(AssetLoading::Loaded)
                 .load_collection::<OverWorldTiles>(),
         )
+        .add_message::<PlayerMovement>()
         .add_systems(Startup, setup)
         .add_systems(
             OnEnter(AssetLoading::Loaded),
@@ -91,7 +97,16 @@ fn main() {
                 .run_if(in_state(AssetLoading::Loading))
                 .after(LoadingStateSet(AssetLoading::Loading)),
         )
-        .add_systems(Update, (move_pc).run_if(in_state(AssetLoading::Loaded)))
+        .add_systems(
+            Update,
+            (
+                controls_player_move::controls_player_move,
+                handle_player_move::handle_player_move.run_if(on_message::<PlayerMovement>),
+                move_pc::move_pc,
+            )
+                .chain()
+                .run_if(not(in_state(AssetLoading::Loading))),
+        )
         .add_systems(
             OnEnter(AssetLoading::Loaded),
             spawn_pc.after(LoadingStateSet(AssetLoading::Loading)),
@@ -115,15 +130,21 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     // Load a map asset and retrieve its handle
     let map_handle: Handle<TiledMapAsset> = asset_server.load("maps/starter-town.tmx");
+    let player_loc = PlayerLoc(33, 33);
 
     // Spawn a new entity with the TiledMap component
     commands.spawn((
         TiledMap(map_handle),
         TilemapAnchor::TopLeft,
         tile_transform(33., 33.),
-        PlayerLoc(33., 33.),
+        // player_loc.clone(),
         BackgroundMarker,
     ));
+    commands.insert_resource(PlayerState {
+        loc: player_loc.clone(),
+        distance_from_loc: 0.0,
+        moving_to: None,
+    });
 }
 
 pub fn tile_transform(x: f32, y: f32) -> Transform {
@@ -186,31 +207,4 @@ fn print_progress(
             progress
         );
     }
-}
-
-fn move_pc(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut background: Single<(&mut PlayerLoc, &mut Transform), With<BackgroundMarker>>,
-) {
-    if keyboard_input.just_pressed(KeyCode::KeyW) {
-        trace!("move up");
-        background.0.1 -= 1.;
-    }
-
-    if keyboard_input.just_pressed(KeyCode::KeyS) {
-        trace!("move down");
-        background.0.1 += 1.;
-    }
-
-    if keyboard_input.just_pressed(KeyCode::KeyA) {
-        trace!("move left");
-        background.0.0 -= 1.;
-    }
-
-    if keyboard_input.just_pressed(KeyCode::KeyD) {
-        trace!("move right");
-        background.0.0 += 1.;
-    }
-
-    *background.1 = tile_transform(background.0.0, background.0.1);
 }

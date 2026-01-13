@@ -9,6 +9,7 @@ bevy_asset_loader = { version = "0.24.0", features = ["2d", "progress_tracking"]
 bevy_common_assets = { version = "0.14.0", features = ["ron"] }
 bevy_ecs_tiled = { version = "0.10.0", features = ["serde"] }
 iyes_progress = { version = "0.15.0", features = ["assets"] }
+serde = { version = "1.0.228", features = ["derive"] }
 
 # # You can configure the warning levels of Bevy lints here. For a list of all lints, see:
 # # <https://thebevyflock.github.io/bevy_cli/bevy_lint/lints/>
