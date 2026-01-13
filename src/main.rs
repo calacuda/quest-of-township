@@ -13,7 +13,10 @@ use crate::{
         background_marker::BackgroundMarker, player_loc::PlayerLoc, player_state::PlayerState,
     },
     events::player_movement::PlayerMovement,
-    systems::{controls_player_move, handle_player_move, move_pc},
+    systems::{
+        controls_player_move::controls_player_move, handle_player_move::handle_player_move,
+        move_pc::move_pc, player_in_motion::player_in_motion,
+    },
 };
 
 pub mod components;
@@ -100,9 +103,9 @@ fn main() {
         .add_systems(
             Update,
             (
-                controls_player_move::controls_player_move,
-                handle_player_move::handle_player_move.run_if(on_message::<PlayerMovement>),
-                move_pc::move_pc,
+                controls_player_move.run_if(not(player_in_motion)),
+                handle_player_move.run_if(on_message::<PlayerMovement>),
+                move_pc,
             )
                 .chain()
                 .run_if(not(in_state(AssetLoading::Loading))),
