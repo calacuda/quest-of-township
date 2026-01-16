@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="35" height="19" tilewidth="16" tileheight="16" infinite="1" nextlayerid="16" nextobjectid="62">
  <tileset firstgid="1" name="main-outside" tilewidth="16" tileheight="16" spacing="1" tilecount="1767" columns="57">
-  <grid orientation="orthogonal" width="1" height="1"/>
   <image source="tile-sets/Spritesheet/roguelikeSheet_transparent.png" width="968" height="526"/>
  </tileset>
  <layer id="4" name="ground" width="96" height="80">

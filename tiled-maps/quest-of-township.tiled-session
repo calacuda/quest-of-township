@@ -23,11 +23,11 @@
             "scaleInEditor": 2
         },
         "starter-town-2.tmx": {
-            "scale": 1,
+            "scale": 0.33,
             "selectedLayer": 9,
             "viewCenter": {
-                "x": -107,
-                "y": 191
+                "x": 496.9696969696969,
+                "y": 354.5454545454545
             }
         },
         "starter-town-2.tmx#main-outside": {
@@ -85,13 +85,14 @@
     "map.width": 35,
     "openFiles": [
         "starter-town.tmx",
-        "main-outside.tsx"
+        "main-outside.tsx",
+        "starter-town-2.tmx"
     ],
     "project": "quest-of-township.tiled-project",
     "recentFiles": [
+        "starter-town-2.tmx",
         "main-outside.tsx",
         "starter-town.tmx",
-        "starter-town-2.tmx",
         "sprites.tsx",
         "starter-town-v2.tmx",
         "starter-town.json"
