@@ -5,17 +5,23 @@ use bevy::{
     prelude::*,
 };
 use bevy_asset_loader::prelude::*;
-use bevy_ecs_tiled::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
+use rustc_hash::FxHashSet;
 
 use crate::{
     components::{
-        background_marker::BackgroundMarker, player_loc::PlayerLoc, player_state::PlayerState,
+        background_marker::BackgroundMarker,
+        player::PlayerBundle,
+        player_loc::PlayerLoc,
+        player_state::PlayerState,
+        wall::{LevelWalls, WallBundle},
     },
     events::player_movement::PlayerMovement,
     systems::{
-        controls_player_move::controls_player_move, handle_player_move::handle_player_move,
-        move_pc::move_pc, player_in_motion::player_in_motion,
+        cache_wall_locations::cache_wall_locations, controls_player_move::controls_player_move,
+        handle_player_move::handle_player_move, move_pc::move_pc,
+        player_in_motion::player_in_motion,
     },
 };
 
@@ -23,6 +29,8 @@ pub mod components;
 pub mod events;
 pub mod plugins;
 pub mod systems;
+
+pub type HashSet<T> = FxHashSet<T>;
 
 pub const H_IN_TILES: usize = 19;
 pub const W_IN_TILES: usize = 35;
@@ -74,7 +82,7 @@ fn main() {
                     ..default()
                 }),
             FrameTimeDiagnosticsPlugin::default(),
-            TiledPlugin::default(),
+            LdtkPlugin::default(),
             ProgressPlugin::<AssetLoading>::new()
                 .with_state_transition(AssetLoading::Loading, AssetLoading::Loaded),
         ))
@@ -85,6 +93,9 @@ fn main() {
                 .load_collection::<OverWorldTiles>(),
         )
         .add_message::<PlayerMovement>()
+        .register_ldtk_entity::<PlayerBundle>("Player")
+        .register_ldtk_int_cell::<WallBundle>(1)
+        .init_resource::<LevelWalls>()
         .add_systems(Startup, setup)
         .add_systems(
             OnEnter(AssetLoading::Loaded),
@@ -103,11 +114,14 @@ fn main() {
         .add_systems(
             Update,
             (
-                controls_player_move.run_if(not(player_in_motion)),
-                handle_player_move.run_if(on_message::<PlayerMovement>),
-                move_pc,
+                (
+                    controls_player_move.run_if(not(player_in_motion)),
+                    handle_player_move.run_if(on_message::<PlayerMovement>),
+                    move_pc,
+                )
+                    .chain(),
+                cache_wall_locations,
             )
-                .chain()
                 .run_if(not(in_state(AssetLoading::Loading))),
         )
         .add_systems(
@@ -132,21 +146,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     // Load a map asset and retrieve its handle
-    let map_handle: Handle<TiledMapAsset> = asset_server.load("maps/starter-town.tmx");
-    let player_loc = PlayerLoc(33, 33);
-
-    // Spawn a new entity with the TiledMap component
-    commands.spawn((
-        TiledMap(map_handle),
-        TilemapAnchor::TopLeft,
-        tile_transform(33., 33.),
-        // player_loc.clone(),
-        BackgroundMarker,
-    ));
-    commands.insert_resource(PlayerState {
-        loc: player_loc.clone(),
-        distance_from_loc: 0.0,
-        moving_to: None,
+    commands.spawn(LdtkWorldBundle {
+        ldtk_handle: asset_server.load("maps/world.ldtk").into(),
+        ..Default::default()
     });
 }
 
@@ -174,19 +176,20 @@ pub fn character_tile_transform(x: f32, y: f32) -> Transform {
 
 fn spawn_pc(mut commands: Commands, over_world: Res<OverWorldTiles>) {
     // draw character sprite
-    debug!("spawning player character");
+    // debug!("spawning player character");
+    warn!("spawning player character not impl'ed yet");
 
-    for index in [1, 65, 338, 220, 362, 424, 347, 193] {
-        let texture_handle = over_world.sprites.clone();
-        let layout_handle = over_world.sprite_sheet.clone();
-        let mut atlas = TextureAtlas::from(layout_handle);
-        atlas.index = index;
-
-        commands.spawn((
-            Sprite::from_atlas_image(texture_handle, atlas),
-            character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-        ));
-    }
+    // for index in [1, 65, 338, 220, 362, 424, 347, 193] {
+    //     let texture_handle = over_world.sprites.clone();
+    //     let layout_handle = over_world.sprite_sheet.clone();
+    //     let mut atlas = TextureAtlas::from(layout_handle);
+    //     atlas.index = index;
+    //
+    //     commands.spawn((
+    //         Sprite::from_atlas_image(texture_handle, atlas),
+    //         character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+    //     ));
+    // }
 }
 
 fn track_fake_long_task() -> Progress {

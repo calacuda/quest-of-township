@@ -1,31 +1,34 @@
 use std::ops::{Add, Sub};
 
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
+use bevy_ecs_ldtk::GridCoords;
 
-#[derive(
-    Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, Debug, Component, Deserialize, Serialize,
-)]
-pub struct PlayerLoc(pub usize, pub usize);
+pub type CoordNum = i32;
 
-impl Sub<(usize, usize)> for PlayerLoc {
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Debug, Component)]
+pub struct PlayerLoc(pub GridCoords);
+// pub struct PlayerLoc(pub usize, pub usize);
+
+impl Sub<(CoordNum, CoordNum)> for PlayerLoc {
     type Output = PlayerLoc;
 
-    fn sub(self, rhs: (usize, usize)) -> Self::Output {
-        Self(self.0 - rhs.0, self.1 - rhs.1)
+    fn sub(self, rhs: (CoordNum, CoordNum)) -> Self::Output {
+        // Self(self.0 - rhs.0, self.1 - rhs.1)
+        Self(GridCoords::new(self.0.x - rhs.0, self.0.y - rhs.1))
     }
 }
 
-impl Add<(usize, usize)> for PlayerLoc {
+impl Add<(CoordNum, CoordNum)> for PlayerLoc {
     type Output = PlayerLoc;
 
-    fn add(self, rhs: (usize, usize)) -> Self::Output {
-        Self(self.0 + rhs.0, self.1 + rhs.1)
+    fn add(self, rhs: (CoordNum, CoordNum)) -> Self::Output {
+        // Self(self.0 + rhs.0, self.1 + rhs.1)
+        Self(GridCoords::new(self.0.x + rhs.0, self.0.y + rhs.1))
     }
 }
 
 impl From<PlayerLoc> for Vec2 {
     fn from(value: PlayerLoc) -> Self {
-        Vec2::from((value.0 as f32, value.1 as f32))
+        Vec2::from((value.0.x as f32, value.0.y as f32))
     }
 }

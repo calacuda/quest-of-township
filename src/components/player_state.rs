@@ -1,9 +1,8 @@
 use bevy::prelude::*;
-use serde::{Deserialize, Serialize};
 
 use crate::components::player_loc::PlayerLoc;
 
-#[derive(Clone, Copy, PartialEq, PartialOrd, Resource, Deserialize, Serialize)]
+#[derive(Clone, Copy, PartialEq, Resource)]
 pub struct PlayerState {
     pub loc: PlayerLoc,
     pub distance_from_loc: f32,

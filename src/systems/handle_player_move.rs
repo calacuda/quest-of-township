@@ -1,24 +1,23 @@
 use bevy::prelude::*;
-use bevy_ecs_tiled::prelude::{TiledObject, TilemapAnchor};
 
-use crate::{components::player_state::PlayerState, events::player_movement::PlayerMovement};
+use crate::{
+    components::{player_state::PlayerState, wall::LevelWalls},
+    events::player_movement::PlayerMovement,
+};
 
 pub fn handle_player_move(
     mut move_msgs: MessageReader<PlayerMovement>,
     mut player_state: ResMut<PlayerState>,
-    map: Query<(&TiledObject, &TilemapAnchor)>,
+    level_walls: Res<LevelWalls>,
 ) {
-    let objects = map.into_iter();
-    // let objects = map.into_iter().map(|obj|  )
-    let objects = objects.collect::<Vec<(&TiledObject, &TilemapAnchor)>>();
-    info!("objects: {:?}", objects);
-
     for move_msg in move_msgs.read() {
         // if is_legal_move(move_msg) {
         if !player_state.is_in_motion() {
             let to = move_msg.to;
-            debug!("moving player to {to:?}");
-            player_state.moving_to = Some(to);
+            if !level_walls.in_wall(&to.0) {
+                debug!("moving player to {to:?}");
+                player_state.moving_to = Some(to);
+            }
         }
         // }
     }
