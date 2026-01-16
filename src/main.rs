@@ -145,6 +145,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         }),
     ));
 
+    commands.insert_resource(PlayerState {
+        loc: PlayerLoc(GridCoords { x: 0, y: 0 }),
+        distance_from_loc: 0.0,
+        moving_to: None,
+    });
+
     // Load a map asset and retrieve its handle
     commands.spawn(LdtkWorldBundle {
         ldtk_handle: asset_server.load("maps/world.ldtk").into(),
