@@ -5,7 +5,7 @@ use bevy::{
     prelude::*,
 };
 use bevy_asset_loader::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
+use bevy_ecs_tilemap::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
 use rustc_hash::FxHashSet;
 
@@ -41,7 +41,7 @@ pub const TILE_PIXLE_W: usize = 16;
 pub const TILE_PIXLE_H: usize = 16;
 
 #[derive(AssetCollection, Resource)]
-struct OverWorldTiles {
+struct SpriteTiles {
     // #[asset(path = "../assets/tile-sets/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
     // floor: HashMap<AssetFileStem, Handle<Image>>,
     // #[asset(path = "../assets/sprites/single-png/", collection(mapped, typed), image(sampler(filter = nearest)))]
@@ -60,6 +60,24 @@ struct OverWorldTiles {
         image(sampler(filter = nearest))
     )]
     sprites: Handle<Image>,
+}
+
+#[derive(AssetCollection, Resource)]
+struct OverWorldTiles {
+    #[asset(texture_atlas_layout(
+        tile_size_x = 16,
+        tile_size_y = 16,
+        padding_x = 1,
+        padding_y = 1,
+        rows = 31,
+        columns = 57
+    ))]
+    sprite_sheet: Handle<TextureAtlasLayout>,
+    #[asset(
+        path = "../assets/tile-sets/Spritesheet/roguelikeSheet_transparent.png",
+        image(sampler(filter = nearest))
+    )]
+    tiles: Handle<Image>,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
@@ -82,7 +100,7 @@ fn main() {
                     ..default()
                 }),
             FrameTimeDiagnosticsPlugin::default(),
-            LdtkPlugin::default(),
+            TilemapPlugin,
             ProgressPlugin::<AssetLoading>::new()
                 .with_state_transition(AssetLoading::Loading, AssetLoading::Loaded),
         ))
@@ -90,11 +108,10 @@ fn main() {
         .add_loading_state(
             LoadingState::new(AssetLoading::Loading)
                 .continue_to_state(AssetLoading::Loaded)
-                .load_collection::<OverWorldTiles>(),
+                .load_collection::<OverWorldTiles>()
+                .load_collection::<SpriteTiles>(),
         )
         .add_message::<PlayerMovement>()
-        .register_ldtk_entity::<PlayerBundle>("Player")
-        .register_ldtk_int_cell::<WallBundle>(1)
         .init_resource::<LevelWalls>()
         .add_systems(Startup, setup)
         .add_systems(
@@ -145,17 +162,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         }),
     ));
 
-    commands.insert_resource(PlayerState {
-        loc: PlayerLoc(GridCoords { x: 0, y: 0 }),
-        distance_from_loc: 0.0,
-        moving_to: None,
-    });
-
-    // Load a map asset and retrieve its handle
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("maps/world.ldtk").into(),
-        ..Default::default()
-    });
+    // TODO: spawn town
 }
 
 pub fn tile_transform(x: f32, y: f32) -> Transform {
@@ -180,22 +187,22 @@ pub fn character_tile_transform(x: f32, y: f32) -> Transform {
     )
 }
 
-fn spawn_pc(mut commands: Commands, over_world: Res<OverWorldTiles>) {
+fn spawn_pc(mut commands: Commands, sprite_sheet: Res<SpriteTiles>) {
     // draw character sprite
     // debug!("spawning player character");
     warn!("spawning player character not impl'ed yet");
 
-    // for index in [1, 65, 338, 220, 362, 424, 347, 193] {
-    //     let texture_handle = over_world.sprites.clone();
-    //     let layout_handle = over_world.sprite_sheet.clone();
-    //     let mut atlas = TextureAtlas::from(layout_handle);
-    //     atlas.index = index;
-    //
-    //     commands.spawn((
-    //         Sprite::from_atlas_image(texture_handle, atlas),
-    //         character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
-    //     ));
-    // }
+    for index in [1, 65, 338, 220, 362, 424, 347, 193] {
+        let texture_handle = sprite_sheet.sprites.clone();
+        let layout_handle = sprite_sheet.sprite_sheet.clone();
+        let mut atlas = TextureAtlas::from(layout_handle);
+        atlas.index = index;
+
+        commands.spawn((
+            Sprite::from_atlas_image(texture_handle, atlas),
+            character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
+        ));
+    }
 }
 
 fn track_fake_long_task() -> Progress {

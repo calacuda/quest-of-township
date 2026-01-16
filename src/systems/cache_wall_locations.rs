@@ -1,15 +1,18 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
+use bevy_ecs_tilemap::prelude::*;
 
 use crate::{
     TILE_PIXLE_H, TILE_PIXLE_W,
-    components::wall::{LevelWalls, Wall},
+    components::{
+        player_loc::Location,
+        wall::{LevelWalls, Wall},
+    },
 };
 
 pub fn cache_wall_locations(
     mut level_walls: ResMut<LevelWalls>,
     mut level_messages: MessageReader<LevelEvent>,
-    walls: Query<&GridCoords, With<Wall>>,
+    walls: Query<&Location, With<Wall>>,
     ldtk_project_entities: Query<&LdtkProjectHandle>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
 ) -> Result {
