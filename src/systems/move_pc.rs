@@ -21,7 +21,7 @@ pub fn move_pc(
         background.translation = set_to.translation;
 
         if player_state.distance_from_loc >= 1.0 {
-            **background = tile_transform(move_to.0.x as f32, move_to.0.x as f32);
+            **background = tile_transform(move_to.x as f32, move_to.x as f32);
             player_state.moving_to = None;
             player_state.loc = move_to;
             player_state.distance_from_loc = 0.0;

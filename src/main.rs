@@ -12,8 +12,7 @@ use rustc_hash::FxHashSet;
 use crate::{
     components::{
         background_marker::BackgroundMarker,
-        player::PlayerBundle,
-        player_loc::PlayerLoc,
+        grid_loc::GridLoc,
         player_state::PlayerState,
         wall::{LevelWalls, WallBundle},
     },
@@ -54,16 +53,16 @@ struct SpriteTiles {
         rows = 12,
         columns = 54
     ))]
-    sprite_sheet: Handle<TextureAtlasLayout>,
+    pub sprite_sheet: Handle<TextureAtlasLayout>,
     #[asset(
         path = "sprites/Spritesheet/roguelikeChar_transparent.png",
         image(sampler(filter = nearest))
     )]
-    sprites: Handle<Image>,
+    pub sprites: Handle<Image>,
 }
 
 #[derive(AssetCollection, Resource)]
-struct OverWorldTiles {
+struct WorldTiles {
     #[asset(texture_atlas_layout(
         tile_size_x = 16,
         tile_size_y = 16,
@@ -72,12 +71,12 @@ struct OverWorldTiles {
         rows = 31,
         columns = 57
     ))]
-    sprite_sheet: Handle<TextureAtlasLayout>,
+    pub sprite_sheet: Handle<TextureAtlasLayout>,
     #[asset(
         path = "../assets/tile-sets/Spritesheet/roguelikeSheet_transparent.png",
         image(sampler(filter = nearest))
     )]
-    tiles: Handle<Image>,
+    pub tiles: Handle<Image>,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Default, States)]
@@ -100,15 +99,15 @@ fn main() {
                     ..default()
                 }),
             FrameTimeDiagnosticsPlugin::default(),
-            TilemapPlugin,
             ProgressPlugin::<AssetLoading>::new()
                 .with_state_transition(AssetLoading::Loading, AssetLoading::Loaded),
         ))
+        .add_plugins(TilemapPlugin)
         .init_state::<AssetLoading>()
         .add_loading_state(
             LoadingState::new(AssetLoading::Loading)
                 .continue_to_state(AssetLoading::Loaded)
-                .load_collection::<OverWorldTiles>()
+                .load_collection::<WorldTiles>()
                 .load_collection::<SpriteTiles>(),
         )
         .add_message::<PlayerMovement>()
@@ -143,7 +142,9 @@ fn main() {
         )
         .add_systems(
             OnEnter(AssetLoading::Loaded),
-            spawn_pc.after(LoadingStateSet(AssetLoading::Loading)),
+            (spawn_town, spawn_pc)
+                .chain()
+                .after(LoadingStateSet(AssetLoading::Loading)),
         )
         .run();
 }
@@ -163,6 +164,56 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 
     // TODO: spawn town
+}
+
+fn spawn_town(mut commands: Commands, asset_server: Res<AssetServer>, tile_sheet: Res<WorldTiles>) {
+    let map_size = TilemapSize { x: 32, y: 32 };
+
+    // Create a tilemap entity a little early.
+    // We want this entity early because we need to tell each tile which tilemap entity
+    // it is associated with. This is done with the TilemapId component on each tile.
+    // Eventually, we will insert the `TilemapBundle` bundle on the entity, which
+    // will contain various necessary components, such as `TileStorage`.
+    let tilemap_entity = commands.spawn_empty().id();
+
+    // To begin creating the map we will need a `TileStorage` component.
+    // This component is a grid of tile entities and is used to help keep track of individual
+    // tiles in the world. If you have multiple layers of tiles you would have a tilemap entity
+    // per layer, each with their own `TileStorage` component.
+    let mut tile_storage = TileStorage::empty(map_size);
+
+    // Spawn the elements of the tilemap.
+    // Alternatively, you can use helpers::filling::fill_tilemap.
+    for x in 0..map_size.x {
+        for y in 0..map_size.y {
+            let tile_pos = TilePos { x, y };
+            let tile_entity = commands
+                .spawn(TileBundle {
+                    position: tile_pos,
+                    tilemap_id: TilemapId(tilemap_entity),
+                    ..Default::default()
+                })
+                .id();
+            tile_storage.set(&tile_pos, tile_entity);
+        }
+    }
+
+    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
+    let grid_size = tile_size.into();
+    let map_type = TilemapType::default();
+
+    commands.entity(tilemap_entity).insert(TilemapBundle {
+        grid_size,
+        map_type,
+        size: map_size,
+        storage: tile_storage,
+        // texture: TilemapTexture::Single(texture_handle),
+        texture: TilemapTexture::Single(tile_sheet.tiles.clone()),
+        tile_size,
+        anchor: TilemapAnchor::TopLeft,
+        spacing: TilemapSpacing { x: 0., y: 0. },
+        ..Default::default()
+    });
 }
 
 pub fn tile_transform(x: f32, y: f32) -> Transform {

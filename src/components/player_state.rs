@@ -1,12 +1,12 @@
 use bevy::prelude::*;
 
-use crate::components::player_loc::PlayerLoc;
+use crate::components::grid_loc::GridLoc;
 
 #[derive(Clone, Copy, PartialEq, Resource)]
 pub struct PlayerState {
-    pub loc: PlayerLoc,
+    pub loc: GridLoc,
     pub distance_from_loc: f32,
-    pub moving_to: Option<PlayerLoc>,
+    pub moving_to: Option<GridLoc>,
 }
 
 impl PlayerState {

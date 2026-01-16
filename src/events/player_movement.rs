@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use crate::components::player_loc::PlayerLoc;
+use crate::components::grid_loc::GridLoc;
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Message)]
 pub struct PlayerMovement {
-    pub from: PlayerLoc,
-    pub to: PlayerLoc,
+    pub from: GridLoc,
+    pub to: GridLoc,
 }

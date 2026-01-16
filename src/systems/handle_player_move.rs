@@ -14,7 +14,7 @@ pub fn handle_player_move(
         // if is_legal_move(move_msg) {
         if !player_state.is_in_motion() {
             let to = move_msg.to;
-            if !level_walls.in_wall(&to.0) {
+            if !level_walls.in_wall(&to) {
                 debug!("moving player to {to:?}");
                 player_state.moving_to = Some(to);
             }
