@@ -23,14 +23,15 @@
             "scaleInEditor": 2
         },
         "starter-town-2.tmx": {
-            "scale": 11,
+            "scale": 1,
             "selectedLayer": 9,
             "viewCenter": {
-                "x": 14.136363636363637,
-                "y": 37.63636363636364
+                "x": -107,
+                "y": 191
             }
         },
         "starter-town-2.tmx#main-outside": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         },
         "starter-town-2.tmx#sprites": {
@@ -56,11 +57,11 @@
             }
         },
         "starter-town.tmx": {
-            "scale": 0.5,
-            "selectedLayer": 10,
+            "scale": 0.75,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 189,
-                "y": 180
+                "x": 44,
+                "y": 151.99999999999994
             }
         },
         "starter-town.tmx#main-outside": {
@@ -74,7 +75,7 @@
         }
     },
     "last.exportedFilePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps",
-    "last.imagePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps/sprites/Spritesheet",
+    "last.imagePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps/tile-sets/Spritesheet",
     "map.fixedSize": false,
     "map.height": 19,
     "map.lastUsedExportFilter": "All Files (*)",
@@ -83,14 +84,15 @@
     "map.tileWidth": 16,
     "map.width": 35,
     "openFiles": [
-        "starter-town.tmx"
+        "starter-town.tmx",
+        "main-outside.tsx"
     ],
     "project": "quest-of-township.tiled-project",
     "recentFiles": [
-        "starter-town-2.tmx",
-        "starter-town.tmx",
-        "sprites.tsx",
         "main-outside.tsx",
+        "starter-town.tmx",
+        "starter-town-2.tmx",
+        "sprites.tsx",
         "starter-town-v2.tmx",
         "starter-town.json"
     ],
