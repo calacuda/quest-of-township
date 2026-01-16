@@ -9,12 +9,43 @@
     ],
     "fileStates": {
         "": {
-            "scaleInDock": 1
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "main-outside.tsx": {
             "dynamicWrapping": true,
             "scaleInDock": 1.5,
             "scaleInEditor": 1
+        },
+        "sprites.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 2
+        },
+        "starter-town-2.tmx": {
+            "scale": 11,
+            "selectedLayer": 9,
+            "viewCenter": {
+                "x": 14.136363636363637,
+                "y": 37.63636363636364
+            }
+        },
+        "starter-town-2.tmx#main-outside": {
+            "scaleInDock": 1
+        },
+        "starter-town-2.tmx#sprites": {
+            "scaleInDock": 1
+        },
+        "starter-town-v2.tmx": {
+            "scale": 1.5,
+            "selectedLayer": 9,
+            "viewCenter": {
+                "x": -81,
+                "y": -3.6666666666666856
+            }
+        },
+        "starter-town-v2.tmx#main-outside": {
+            "scaleInDock": 1
         },
         "starter-town.json": {
             "scale": 0.6649999999999999,
@@ -25,20 +56,25 @@
             }
         },
         "starter-town.tmx": {
-            "scale": 0.75,
-            "selectedLayer": 5,
+            "scale": 0.5,
+            "selectedLayer": 10,
             "viewCenter": {
-                "x": 255.33333333333337,
-                "y": 128
+                "x": 189,
+                "y": 180
             }
         },
         "starter-town.tmx#main-outside": {
             "dynamicWrapping": false,
             "scaleInDock": 1
+        },
+        "starter-town.tmx#sprites": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         }
     },
     "last.exportedFilePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps",
-    "last.imagePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps/sprites/single-png",
+    "last.imagePath": "/home/yogurt/Code/rust/quest-of-township/tiled-maps/sprites/Spritesheet",
     "map.fixedSize": false,
     "map.height": 19,
     "map.lastUsedExportFilter": "All Files (*)",
@@ -47,15 +83,23 @@
     "map.tileWidth": 16,
     "map.width": 35,
     "openFiles": [
-        "main-outside.tsx",
         "starter-town.tmx"
     ],
     "project": "quest-of-township.tiled-project",
     "recentFiles": [
-        "main-outside.tsx",
+        "starter-town-2.tmx",
         "starter-town.tmx",
+        "sprites.tsx",
+        "main-outside.tsx",
+        "starter-town-v2.tmx",
         "starter-town.json"
     ],
     "tileset.lastUsedFormat": "tsx",
-    "tileset.type": 1
+    "tileset.margin": 0,
+    "tileset.spacing": 1,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    },
+    "tileset.type": 0
 }
