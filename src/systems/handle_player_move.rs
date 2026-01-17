@@ -17,10 +17,16 @@ pub fn handle_player_move(
             let to = move_msg.to;
 
             // if move is legal
+            // if !level_walls.in_wall(&to)
+            //     && !((vertical(&move_msg.from.into(), tile_attrs.into_iter())
+            //         || vertical(&move_msg.to.into(), tile_attrs.into_iter()))
+            //         && going_vert(&move_msg.to, &move_msg.from))
+            // {
             if !level_walls.in_wall(&to)
-                && !((vertical(&move_msg.from.into(), tile_attrs.into_iter())
-                    || vertical(&move_msg.to.into(), tile_attrs.into_iter()))
+                && !(vertical(&move_msg.from.into(), tile_attrs.into_iter())
                     && going_vert(&move_msg.to, &move_msg.from))
+                && !(vertical(&move_msg.to.into(), tile_attrs.into_iter())
+                    && going_vert(&move_msg.from, &move_msg.to))
             {
                 debug!("moving player to {to:?}");
                 player_state.moving_to = Some(to);
@@ -34,7 +40,7 @@ pub fn handle_player_move(
 fn going_vert(to: &GridLoc, from: &GridLoc) -> bool {
     trace!("going from {from:?} -> {to:?}");
 
-    to.y != from.y
+    to.y < from.y
 }
 
 pub fn vertical(
