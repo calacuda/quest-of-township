@@ -1,6 +1,7 @@
 use std::ops::{Add, Sub};
 
 use bevy::prelude::*;
+use bevy_ecs_tilemap::tiles::TilePos;
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -37,5 +38,14 @@ impl Add<(i32, i32)> for GridLoc {
 impl From<GridLoc> for Vec2 {
     fn from(value: GridLoc) -> Self {
         Vec2::from((value.x as f32, value.y as f32))
+    }
+}
+
+impl From<GridLoc> for TilePos {
+    fn from(value: GridLoc) -> Self {
+        TilePos {
+            x: value.x as u32,
+            y: value.y as u32,
+        }
     }
 }
