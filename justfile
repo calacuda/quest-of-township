@@ -7,3 +7,6 @@ _import_a_map cp_from cp_to:
 import-maps:
   # mv ~/Downloads/qot-starter-town.json ./assets/maps/starter-town.json
   @just _import_a_map qot-starter-town.json starter-town.json
+
+gh_watch:
+  zsh -c 'gh run watch -i 1 --exit-status && echo "RUN SUCCESFUL" || gh run view --log-failed'
