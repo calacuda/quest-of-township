@@ -89,17 +89,23 @@ enum AssetLoading {
 }
 
 fn main() {
+    let default_plugins = DefaultPlugins
+        .set(ImagePlugin::default_nearest())
+        .set(LogPlugin {
+            // Set the default log level for everything
+            level: Level::INFO,
+            // Or use a filter string for fine-grained control
+            filter: format!("info,{}=trace", env!("CARGO_PKG_NAME").replace("-", "_")),
+            ..default()
+        });
+    #[cfg(feature = "headless_ci")]
+    let default_plugins = default_plugins
+        .disable::<bevy::window::WindowPlugin>()
+        .disable::<bevy::render::RenderPlugin>();
+
     App::new()
         .add_plugins((
-            DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-                .set(LogPlugin {
-                    // Set the default log level for everything
-                    level: Level::INFO,
-                    // Or use a filter string for fine-grained control
-                    filter: format!("info,{}=trace", env!("CARGO_PKG_NAME").replace("-", "_")),
-                    ..default()
-                }),
+            default_plugins,
             FrameTimeDiagnosticsPlugin::default(),
             ProgressPlugin::<AssetLoading>::new()
                 .with_state_transition(AssetLoading::Loading, AssetLoading::Loaded),

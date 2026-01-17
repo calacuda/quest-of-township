@@ -3,10 +3,7 @@ use bevy_spritefusion::prelude::*;
 
 use crate::{
     HashSet,
-    components::{
-        grid_loc::GridLoc,
-        wall::{LevelWalls, Wall},
-    },
+    components::{grid_loc::GridLoc, wall::LevelWalls},
     events::level_event::LevelEvent,
 };
 

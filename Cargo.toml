@@ -3,21 +3,53 @@ name = "quest-of-township"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = ["bevy/default", "bevy_ecs_tilemap/default"]
+headless_ci = [
+  "bevy/bevy_ci_testing",
+  "bevy/audio",
+  # might need to be modified to remove the "ui_picking" feature
+  "bevy/picking",
+  "bevy/scene",
+
+  "bevy/dev",
+
+  "bevy/bevy_gilrs",
+  "bevy/default_font",
+  "bevy/multi_threaded",
+  "bevy/std",
+  "bevy/sysinfo_plugin",
+  "bevy/webgl2",
+
+  "bevy/async_executor",
+  "bevy/bevy_asset",
+  "bevy/bevy_input_focus", 
+  "bevy/bevy_log",
+  "bevy/bevy_state",
+  "bevy/bevy_window",
+  "bevy/custom_cursor",
+  "bevy/reflect_auto_register",
+
+  "bevy/x11",
+  # "bevy/",
+  # "bevy/",
+]
+
 [profile.dev.package.wgpu-types]
 debug-assertions = false
 
 [dependencies]
-bevy = { version = "0.18", features = ["png"] }
+bevy = { version = "0.18", features = ["png"], default-features=false }
 bevy_asset_loader = { version = "0.25.0", features = ["2d", "progress_tracking"] }
 bevy_common_assets = { version = "0.15.0", features = ["ron"] }
-bevy_ecs_tilemap = { version = "0.18.1", features = ["atlas", "serde"] }
+bevy_ecs_tilemap = { version = "0.18.1", features = ["atlas", "serde"], default-features=false  }
 bevy_spritefusion = { git = "https://github.com/calacuda/bevy_spritefusion", version = "0.1.0" }
 iyes_progress = { version = "0.16.0", features = ["assets"] }
 rustc-hash = { version = "2.1.1", features = ["nightly"] }
 serde = { version = "1.0.228", features = ["derive"] }
 
 [dev-dependencies]
-bevy = { version = "0.18", features = ["png", "debug"] }
+bevy = { version = "0.18", features = ["png", "debug", "dev"], default-features=false }
 
 # # You can configure the warning levels of Bevy lints here. For a list of all lints, see:
 # # <https://thebevyflock.github.io/bevy_cli/bevy_lint/lints/>
