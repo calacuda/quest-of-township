@@ -21,14 +21,7 @@ headless_ci = [
   "bevy/sysinfo_plugin",
   "bevy/webgl2",
 
-  "bevy/async_executor",
-  "bevy/bevy_asset",
-  "bevy/bevy_input_focus", 
-  "bevy/bevy_log",
-  "bevy/bevy_state",
-  "bevy/bevy_window",
-  "bevy/custom_cursor",
-  "bevy/reflect_auto_register",
+  "bevy/default_app",
 
   "bevy/x11",
   # "bevy/",
