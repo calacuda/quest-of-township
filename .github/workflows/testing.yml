@@ -15,29 +15,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@nightly
-      with:
-        toolchain: nightly
-    - name: Cache cargo dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
-    - name: Install Xvfb (for headless testing)
-      run: sudo apt-get install xvfb
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        # Essential dependencies for wgpu/bevy on Linux
-        sudo apt-get install -y libasound2-dev libudev-dev pkg-config
-    - name: cargo-check
-      run: xvfb-run --auto-servernum cargo check --verbose --no-default-features --features=headless_ci
-    - name: Run tests (using Xvfb)
-      run: xvfb-run --auto-servernum cargo test --verbose --no-default-features --features=headless_ci,bevy/bevy_ci_testing
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          toolchain: nightly
+
+      - name: Cache cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install Xvfb (for headless testing)
+        run: sudo apt-get install xvfb
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          # Essential dependencies for wgpu/bevy on Linux
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
+
+      - name: cargo-check
+        run: xvfb-run --auto-servernum cargo check --verbose --no-default-features --features=headless_ci
+
+      - name: Install ripgrep
+        run: sudo apt-get install ripgrep
+
+      - name: Run tests only if they exist
+        run: rg "#\[test\]" src && xvfb-run --auto-servernum cargo test --verbose --no-default-features --features=headless_ci,bevy/bevy_ci_testing
 
