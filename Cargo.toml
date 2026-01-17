@@ -11,9 +11,13 @@ bevy = { version = "0.18", features = ["png"] }
 bevy_asset_loader = { version = "0.25.0", features = ["2d", "progress_tracking"] }
 bevy_common_assets = { version = "0.15.0", features = ["ron"] }
 bevy_ecs_tilemap = { version = "0.18.1", features = ["atlas", "serde"] }
+bevy_spritefusion = { git = "https://github.com/calacuda/bevy_spritefusion", version = "0.1.0" }
 iyes_progress = { version = "0.16.0", features = ["assets"] }
 rustc-hash = { version = "2.1.1", features = ["nightly"] }
 serde = { version = "1.0.228", features = ["derive"] }
+
+[dev-dependencies]
+bevy = { version = "0.18", features = ["png", "debug"] }
 
 # # You can configure the warning levels of Bevy lints here. For a list of all lints, see:
 # # <https://thebevyflock.github.io/bevy_cli/bevy_lint/lints/>

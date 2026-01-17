@@ -1,8 +1,7 @@
 use bevy::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
 
 use crate::{
-    TILE_PIXLE_H, TILE_PIXLE_W,
+    HashSet,
     components::{
         grid_loc::GridLoc,
         wall::{LevelWalls, Wall},
@@ -16,7 +15,7 @@ pub fn cache_wall_locations(
     walls: Query<&GridLoc, With<Wall>>,
 ) -> Result {
     for level_event in level_messages.read() {
-        if *level_event == LevelEvent::Spawned {
+        if let LevelEvent::Spawned { w, h } = *level_event {
             // let ldtk_project = ldtk_project_assets
             //     .get(ldtk_project_entities.single()?)
             //     .expect("LdtkProject should be loaded when level is spawned");
@@ -24,12 +23,13 @@ pub fn cache_wall_locations(
             //     .get_raw_level_by_iid(level_iid.get())
             //     .expect("spawned level should exist in project");
 
-            let wall_locations = walls.iter().copied().collect();
+            let wall_locations: HashSet<_> = walls.iter().copied().collect();
+            debug!("{} walls found", wall_locations.len());
 
             let new_level_walls = LevelWalls {
                 wall_locations,
-                // level_width: level.px_wid / TILE_PIXLE_W as i32,
-                // level_height: level.px_hei / TILE_PIXLE_H as i32,
+                level_width: w,
+                level_height: h,
             };
 
             *level_walls = new_level_walls;

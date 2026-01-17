@@ -3,24 +3,25 @@ use bevy::{
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
     log::{Level, LogPlugin},
     prelude::*,
+    sprite::Anchor,
 };
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_tilemap::prelude::*;
+use bevy_spritefusion::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
 use rustc_hash::FxHashSet;
 
 use crate::{
     components::{
-        background_marker::BackgroundMarker,
-        grid_loc::GridLoc,
-        player_state::PlayerState,
-        wall::{LevelWalls, WallBundle},
+        background_marker::BackgroundMarker, grid_loc::GridLoc, map_size::MapSize,
+        player_state::PlayerState, wall::LevelWalls,
     },
-    events::player_movement::PlayerMovement,
+    events::{level_event::LevelEvent, player_movement::PlayerMovement},
     systems::{
         cache_wall_locations::cache_wall_locations, controls_player_move::controls_player_move,
-        handle_player_move::handle_player_move, move_pc::move_pc,
-        player_in_motion::player_in_motion,
+        handle_player_move::handle_player_move, level_loaded::level_loaded,
+        mk_size_res::mk_size_res, move_pc::move_pc, player_in_motion::player_in_motion,
+        set_map_anchor::set_map_anchor,
     },
 };
 
@@ -73,7 +74,7 @@ struct WorldTiles {
     ))]
     pub sprite_sheet: Handle<TextureAtlasLayout>,
     #[asset(
-        path = "../assets/tile-sets/Spritesheet/roguelikeSheet_transparent.png",
+        path = "tile-sets/Spritesheet/roguelikeSheet_transparent.png",
         image(sampler(filter = nearest))
     )]
     pub tiles: Handle<Image>,
@@ -102,7 +103,7 @@ fn main() {
             ProgressPlugin::<AssetLoading>::new()
                 .with_state_transition(AssetLoading::Loading, AssetLoading::Loaded),
         ))
-        .add_plugins(TilemapPlugin)
+        .add_plugins(SpriteFusionPlugin)
         .init_state::<AssetLoading>()
         .add_loading_state(
             LoadingState::new(AssetLoading::Loading)
@@ -111,7 +112,9 @@ fn main() {
                 .load_collection::<SpriteTiles>(),
         )
         .add_message::<PlayerMovement>()
+        .add_message::<LevelEvent>()
         .init_resource::<LevelWalls>()
+        .init_resource::<MapSize>()
         .add_systems(Startup, setup)
         .add_systems(
             OnEnter(AssetLoading::Loaded),
@@ -130,27 +133,39 @@ fn main() {
         .add_systems(
             Update,
             (
-                (
-                    controls_player_move.run_if(not(player_in_motion)),
-                    handle_player_move.run_if(on_message::<PlayerMovement>),
-                    move_pc,
-                )
-                    .chain(),
-                cache_wall_locations,
+                controls_player_move.run_if(not(player_in_motion)),
+                handle_player_move.run_if(on_message::<PlayerMovement>),
+                move_pc,
             )
+                .chain()
                 .run_if(not(in_state(AssetLoading::Loading))),
         )
         .add_systems(
+            Update,
+            (
+                set_map_anchor,
+                cache_wall_locations,
+                spawn_pc, /*mk_size_res*/
+            )
+                .run_if(not(in_state(AssetLoading::Loading)))
+                .run_if(on_message::<LevelEvent>),
+        )
+        .add_systems(
+            Update,
+            level_loaded
+                .run_if(not(in_state(AssetLoading::Loading)))
+                .run_if(on_message::<AssetEvent<SpriteFusionMap>>),
+        )
+        .add_systems(
             OnEnter(AssetLoading::Loaded),
-            (spawn_town, spawn_pc)
+            (spawn_town)
                 .chain()
                 .after(LoadingStateSet(AssetLoading::Loading)),
         )
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // let w = (W_IN_TILES * TILE_PIXLES) as u32;
+fn setup(mut commands: Commands) {
     let h = (H_IN_TILES * TILE_PIXLES) as u32;
 
     commands.spawn((
@@ -163,71 +178,43 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         }),
     ));
 
-    // TODO: spawn town
-}
-
-fn spawn_town(mut commands: Commands, asset_server: Res<AssetServer>, tile_sheet: Res<WorldTiles>) {
-    let map_size = TilemapSize { x: 32, y: 32 };
-
-    // Create a tilemap entity a little early.
-    // We want this entity early because we need to tell each tile which tilemap entity
-    // it is associated with. This is done with the TilemapId component on each tile.
-    // Eventually, we will insert the `TilemapBundle` bundle on the entity, which
-    // will contain various necessary components, such as `TileStorage`.
-    let tilemap_entity = commands.spawn_empty().id();
-
-    // To begin creating the map we will need a `TileStorage` component.
-    // This component is a grid of tile entities and is used to help keep track of individual
-    // tiles in the world. If you have multiple layers of tiles you would have a tilemap entity
-    // per layer, each with their own `TileStorage` component.
-    let mut tile_storage = TileStorage::empty(map_size);
-
-    // Spawn the elements of the tilemap.
-    // Alternatively, you can use helpers::filling::fill_tilemap.
-    for x in 0..map_size.x {
-        for y in 0..map_size.y {
-            let tile_pos = TilePos { x, y };
-            let tile_entity = commands
-                .spawn(TileBundle {
-                    position: tile_pos,
-                    tilemap_id: TilemapId(tilemap_entity),
-                    ..Default::default()
-                })
-                .id();
-            tile_storage.set(&tile_pos, tile_entity);
-        }
-    }
-
-    let tile_size = TilemapTileSize { x: 16.0, y: 16.0 };
-    let grid_size = tile_size.into();
-    let map_type = TilemapType::default();
-
-    commands.entity(tilemap_entity).insert(TilemapBundle {
-        grid_size,
-        map_type,
-        size: map_size,
-        storage: tile_storage,
-        // texture: TilemapTexture::Single(texture_handle),
-        texture: TilemapTexture::Single(tile_sheet.tiles.clone()),
-        tile_size,
-        anchor: TilemapAnchor::TopLeft,
-        spacing: TilemapSpacing { x: 0., y: 0. },
-        ..Default::default()
+    commands.insert_resource(PlayerState {
+        loc: GridLoc { x: 0, y: 0 },
+        distance_from_loc: 0.0,
+        moving_to: None,
     });
 }
 
+fn spawn_town(mut commands: Commands, asset_server: Res<AssetServer>) {
+    info!("town spawning");
+
+    commands.spawn((
+        SpriteFusionBundle {
+            map: SpriteFusionMapHandle(asset_server.load("maps/map.json")),
+            tileset: SpriteFusionTilesetHandle(asset_server.load("maps/spritesheet.png")),
+            transform: tile_transform(0., 0.),
+            ..default()
+        },
+        BackgroundMarker,
+    ));
+}
+
 pub fn tile_transform(x: f32, y: f32) -> Transform {
-    let x_zero = (W_MAX * TILE_PIXLES) as f32 * -0.5 - TILE_PIXLES as f32 * 0.5;
-    let y_zero = (H_MAX * TILE_PIXLES) as f32 * 0.5 + TILE_PIXLES as f32 * 0.5;
+    debug!("making a transform for coordinates: ({x}, {y})");
+
+    let x_zero = (W_MAX * TILE_PIXLES) as f32 * -0.5 + TILE_PIXLES as f32 * 0.25;
+    let y_zero = (H_MAX * TILE_PIXLES) as f32 * 0.5;
 
     Transform::from_xyz(
         x_zero + (-x + (W_MAX / 2) as f32) * TILE_PIXLES as f32,
-        y_zero + (y - (H_IN_TILES / 2) as f32) * TILE_PIXLES as f32,
+        y_zero + (-y - (H_IN_TILES / 2) as f32) * TILE_PIXLES as f32,
         0.,
     )
 }
 
 pub fn character_tile_transform(x: f32, y: f32) -> Transform {
+    debug!("making a character transform for coordinates: ({x}, {y})");
+
     let x_zero = (W_MAX * TILE_PIXLES) as f32 * -0.5;
     let y_zero = (H_MAX * TILE_PIXLES) as f32 * 0.5;
 
@@ -240,8 +227,8 @@ pub fn character_tile_transform(x: f32, y: f32) -> Transform {
 
 fn spawn_pc(mut commands: Commands, sprite_sheet: Res<SpriteTiles>) {
     // draw character sprite
-    // debug!("spawning player character");
-    warn!("spawning player character not impl'ed yet");
+    debug!("spawning player character");
+    // warn!("spawning player character not impl'ed yet");
 
     for index in [1, 65, 338, 220, 362, 424, 347, 193] {
         let texture_handle = sprite_sheet.sprites.clone();
@@ -251,6 +238,7 @@ fn spawn_pc(mut commands: Commands, sprite_sheet: Res<SpriteTiles>) {
 
         commands.spawn((
             Sprite::from_atlas_image(texture_handle, atlas),
+            Anchor::CENTER,
             character_tile_transform((W_MAX / 2) as f32, (H_MAX / 2) as f32),
         ));
     }

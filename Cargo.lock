@@ -1406,6 +1406,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_spritefusion"
+version = "0.1.0"
+source = "git+https://github.com/calacuda/bevy_spritefusion#34755d71ee7678cb9a7936dcf55478c9ad1a4500"
+dependencies = [
+ "bevy",
+ "bevy_ecs_tilemap",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.17",
+]
+
+[[package]]
 name = "bevy_state"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3900,6 +3912,7 @@ dependencies = [
  "bevy_asset_loader",
  "bevy_common_assets",
  "bevy_ecs_tilemap",
+ "bevy_spritefusion",
  "iyes_progress",
  "rustc-hash 2.1.1",
  "serde",

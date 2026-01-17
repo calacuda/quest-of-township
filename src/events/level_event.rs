@@ -3,6 +3,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Eq, PartialEq, PartialOrd, Ord, Hash, Message, Deserialize, Serialize)]
 pub enum LevelEvent {
-    Spawned,
+    Spawned { w: i32, h: i32 },
     Despawned,
 }

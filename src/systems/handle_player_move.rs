@@ -17,6 +17,8 @@ pub fn handle_player_move(
             if !level_walls.in_wall(&to) {
                 debug!("moving player to {to:?}");
                 player_state.moving_to = Some(to);
+            } else {
+                debug!("ilegal move");
             }
         }
         // }

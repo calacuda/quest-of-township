@@ -13,12 +13,12 @@ pub fn controls_player_move(
 
     if keyboard_input.pressed(KeyCode::KeyW) {
         trace!("move up");
-        to = to - (0, 1);
+        to = to + (0, 1);
     }
 
     if keyboard_input.pressed(KeyCode::KeyS) {
         trace!("move down");
-        to = to + (0, 1);
+        to = to - (0, 1);
     }
 
     if keyboard_input.pressed(KeyCode::KeyA) {
