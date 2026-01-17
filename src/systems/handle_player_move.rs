@@ -18,8 +18,8 @@ pub fn handle_player_move(
 
             // if move is legal
             if !level_walls.in_wall(&to)
-                && !(walk_behind(&move_msg.from.into(), tile_attrs.into_iter())
-                    && going_down(&move_msg.to, &move_msg.from))
+                && !(vertical(&move_msg.from.into(), tile_attrs.into_iter())
+                    && going_vert(&move_msg.to, &move_msg.from))
             {
                 debug!("moving player to {to:?}");
                 player_state.moving_to = Some(to);
@@ -30,19 +30,19 @@ pub fn handle_player_move(
     }
 }
 
-fn going_down(to: &GridLoc, from: &GridLoc) -> bool {
+fn going_vert(to: &GridLoc, from: &GridLoc) -> bool {
     trace!("going from {from:?} -> {to:?}");
 
-    to.y < from.y
+    to.y != from.y
 }
 
-pub fn walk_behind(
+pub fn vertical(
     location: &TilePos,
     attributes: impl Iterator<Item = (&TilePos, &TileAttributes)>,
 ) -> bool {
     for (pos, attrs) in attributes {
         if pos == location {
-            if let Some(walk_behind) = attrs.get_bool("walk-behind")
+            if let Some(walk_behind) = attrs.get_bool("vertical")
                 && walk_behind
             {
                 return true;
