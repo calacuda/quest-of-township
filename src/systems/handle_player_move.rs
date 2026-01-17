@@ -18,7 +18,8 @@ pub fn handle_player_move(
 
             // if move is legal
             if !level_walls.in_wall(&to)
-                && !(vertical(&move_msg.from.into(), tile_attrs.into_iter())
+                && !((vertical(&move_msg.from.into(), tile_attrs.into_iter())
+                    || vertical(&move_msg.to.into(), tile_attrs.into_iter()))
                     && going_vert(&move_msg.to, &move_msg.from))
             {
                 debug!("moving player to {to:?}");
@@ -43,7 +44,7 @@ pub fn vertical(
     for (pos, attrs) in attributes {
         if pos == location {
             if let Some(walk_behind) = attrs.get_bool("vertical")
-                && walk_behind
+                && !walk_behind
             {
                 return true;
             }
