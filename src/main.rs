@@ -198,8 +198,6 @@ fn spawn_town(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn tile_transform(x: f32, y: f32) -> Transform {
-    debug!("making a transform for coordinates: ({x}, {y})");
-
     let x_zero = (W_MAX * TILE_PIXLES) as f32 * -0.5 + TILE_PIXLES as f32 * 0.25;
     let y_zero = (H_MAX * TILE_PIXLES) as f32 * 0.5;
 
