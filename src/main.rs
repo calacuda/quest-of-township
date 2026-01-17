@@ -1,3 +1,5 @@
+#![feature(anonymous_lifetime_in_impl_trait)]
+
 use bevy::{
     camera::ScalingMode,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
@@ -6,7 +8,6 @@ use bevy::{
     sprite::Anchor,
 };
 use bevy_asset_loader::prelude::*;
-use bevy_ecs_tilemap::prelude::*;
 use bevy_spritefusion::prelude::*;
 use iyes_progress::{Progress, ProgressPlugin, ProgressReturningSystem, ProgressTracker};
 use rustc_hash::FxHashSet;
@@ -142,11 +143,7 @@ fn main() {
         )
         .add_systems(
             Update,
-            (
-                set_map_anchor,
-                cache_wall_locations,
-                spawn_pc, /*mk_size_res*/
-            )
+            (set_map_anchor, cache_wall_locations, spawn_pc, mk_size_res)
                 .run_if(not(in_state(AssetLoading::Loading)))
                 .run_if(on_message::<LevelEvent>),
         )
