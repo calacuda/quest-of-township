@@ -29,9 +29,13 @@ pub fn move_pc(
             );
             **background = tile_transform(move_to.x as f32, move_to.y as f32);
             player_state.moving_to = None;
+            player_state.last_loc = player_state.loc.clone();
             player_state.loc = move_to;
             player_state.distance_from_loc = 0.0;
-            debug!("player moved to: {:?}", move_to);
+            debug!(
+                "player moved from: {:?}, to: {:?}",
+                player_state.last_loc, player_state.loc
+            );
 
             if is_warp {
                 info!("warping player");

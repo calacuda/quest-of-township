@@ -177,6 +177,7 @@ fn setup(mut commands: Commands) {
 
     commands.insert_resource(PlayerState {
         loc: GridLoc { x: 0, y: 0 },
+        last_loc: GridLoc { x: 0, y: 0 },
         distance_from_loc: 0.0,
         moving_to: None,
     });
