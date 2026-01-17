@@ -188,7 +188,7 @@ fn spawn_town(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         SpriteFusionBundle {
-            map: SpriteFusionMapHandle(asset_server.load("maps/map.json")),
+            map: SpriteFusionMapHandle(asset_server.load("maps/starter-town.json")),
             tileset: SpriteFusionTilesetHandle(asset_server.load("maps/spritesheet.png")),
             transform: tile_transform(0., 0.),
             ..default()
